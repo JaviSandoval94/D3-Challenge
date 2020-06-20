@@ -35,7 +35,7 @@ var chartGroup = svg.append("g")
 
 // function renderAxes(newXScale, xAxis) {
 //     var bottomAxis = d3.axisBottom(newXScale);
-    
+
 //     xAxis.transition()
 //         .duration(1000)
 //         .call(bottomAxis);
@@ -47,7 +47,7 @@ var chartGroup = svg.append("g")
 //     circlesGroup.transition()
 //         .duration(1000)
 //         .attr("cx", d => newXScale(d[chosenXAxis]));
-        
+
 //     return circlesGroup;
 // }
 
@@ -61,10 +61,10 @@ var chartGroup = svg.append("g")
 //     }
 // }
 
-d3.csv("assets/data/data.csv").then(function(myData){
+d3.csv("assets/data/data.csv").then(function (myData) {
     console.log(myData);
 
-    myData.forEach(function(data) {
+    myData.forEach(function (data) {
         data.poverty = +data.poverty;
         data.healthcare = +data.healthcare;
     });
@@ -85,9 +85,10 @@ d3.csv("assets/data/data.csv").then(function(myData){
         .call(xAxis);
 
     chartGroup.append("g")
-        .call(yAxis);   
-            
-    var radius = 8    
+        .call(yAxis);
+
+    var radius = 8
+
     var circlesGroup = chartGroup.selectAll("circle")
         .data(myData)
         .enter()
@@ -96,17 +97,17 @@ d3.csv("assets/data/data.csv").then(function(myData){
         .attr("cx", d => xScale(d.poverty))
         .attr("cy", d => yScale(d.healthcare))
         .attr("r", radius)
-        //.html(`<text x="${d => xScale(d.poverty)}", y="${yScale(d.healthcare)}", class="stateText">${d => d.abbr}</text>`);
+    //.html(`<text x="${d => xScale(d.poverty)}", y="${yScale(d.healthcare)}", class="stateText">${d => d.abbr}</text>`);
 
-    var labelsGroup = chartGroup.selectAll("text")
+    var labelsGroup = chartGroup.selectAll(".stateText")
         .data(myData)
         .enter()
         .append("text")
         .classed("stateText", true)
         .attr("x", d => xScale(d.poverty))
-        .attr("y", d => yScale(d.healthcare) + radius/3)
+        .attr("y", d => yScale(d.healthcare) + radius / 3)
         .attr("font-size", radius)
-        .text(d => (d.abbr) ? d.abbr: console.log("Not found"));
+        .text(d => d.abbr);
 
     chartGroup.append("text")
         .attr("transform", "rotate(-90)")
@@ -120,6 +121,6 @@ d3.csv("assets/data/data.csv").then(function(myData){
         .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
         .classed("axisText", true)
         .text("In Poverty (%)")
-}).catch(function(error){
+}).catch(function (error) {
     console.log(error);
 });
