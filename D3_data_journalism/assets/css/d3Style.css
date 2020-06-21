@@ -52,13 +52,6 @@
   border-radius: 4px;
 }
 
-.axisText {
-  font-family: sans-serif;
-  font-weight: bold;
-  fill: #000;
-  text-anchor: middle;
-}
-
 /* Mobile Rules */
 @media screen and (max-width: 530px) {
   .stateText {
