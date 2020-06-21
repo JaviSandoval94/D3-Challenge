@@ -12,12 +12,14 @@ var margin = {
 var width = svgWidth - margin.left - margin.right;
 var height = svgHeight - margin.top - margin.bottom;
 
+// Select scatter element and create SVG wrapper
 var svg = d3
     .select("#scatter")
     .append("svg")
     .attr("width", svgWidth)
     .attr("height", svgHeight);
 
+// Append SVG group
 var chartGroup = svg.append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
@@ -26,7 +28,7 @@ var chosenXAxis = "poverty";
 var chosenYAxis = "healthcare";
 var radius = 8
 
-// Create scales
+// Define scale functions based on the axes selections
 function xScale (myData, chosenXAxis){
     var xLinearScale = d3.scaleLinear()
         .domain([d3.min(myData, d => d[chosenXAxis]) * 0.8,
@@ -45,7 +47,7 @@ function yScale (myData, chosenYAxis){
     return yLinearScale;
 };
 
-// Update axes
+// Declare function for updating x and y axes upon selection
 function renderXAxis(newXScale, xAxis) {
     var bottomAxis = d3.axisBottom(newXScale);
 
@@ -66,6 +68,7 @@ function renderYAxis(newYScale, yAxis) {
     return yAxis;
 };
 
+// Declare function to transport circles based on axes selection
 function renderCircles(circlesGroup, newXScale, newYScale, chosenXAxis, chosenYAxis) {
     circlesGroup.transition()
         .duration(1000)
@@ -74,6 +77,7 @@ function renderCircles(circlesGroup, newXScale, newYScale, chosenXAxis, chosenYA
     return circlesGroup;
 };
 
+// Declare function to transport state labels based on the axes selection
 function renderLabels(labelsGroup, newXScale, newYScale, chosenXAxis, chosenYAxis) {
     labelsGroup.transition()
         .duration(1000)
@@ -82,10 +86,11 @@ function renderLabels(labelsGroup, newXScale, newYScale, chosenXAxis, chosenYAxi
     return labelsGroup;
 };
 
+// Declare function to update tooltip based on the axes selection
 function updateToolTip(chosenXAxis, chosenYAxis, labelsGroup) {
     var xLabelTool;
     var yLabelTool;
-
+    // x-Axis cases
     switch (chosenXAxis) {
         case "poverty": xLabelTool = "Poverty (%):";
             break;
@@ -94,7 +99,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, labelsGroup) {
         case "income": xLabelTool = "Median household income:";
             break;
     }
-
+    // y-Axis cases
     switch (chosenYAxis) {
         case "healthcare": yLabelTool = "Lacks healthcare (%):";
             break;
@@ -110,7 +115,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, labelsGroup) {
         .html(function(d) {
             return (`${d.state}<br>${xLabelTool} ${d[chosenXAxis]}<br>${yLabelTool} ${d[chosenYAxis]}`)
         });
-    
+    // Declare handlers 
     labelsGroup.call(toolTip);
     labelsGroup.on("mouseover", function(data) {
         toolTip.show(data);
@@ -122,10 +127,10 @@ function updateToolTip(chosenXAxis, chosenYAxis, labelsGroup) {
     return labelsGroup;
 }
 
+// Call data csv and plot initial parameters
 d3.csv("assets/data/data.csv").then(function(myData, err) {
     if (err) throw err;
-    console.log(myData);
-
+    // Parse data
     myData.forEach(function (data) {
         data.poverty = +data.poverty;
         data.healthcare = +data.healthcare;
@@ -134,20 +139,20 @@ d3.csv("assets/data/data.csv").then(function(myData, err) {
         data.obese = +data.obesity;
         data.income = +data.income;
     });
-
+    // Assign scales based on initial selected values
     var xLinearScale = xScale(myData, chosenXAxis);
     var yLinearScale = yScale(myData, chosenYAxis);
-
+    // Select axis scaless based on initial selected values
     var bottomAxis = d3.axisBottom(xLinearScale);
     var leftAxis = d3.axisLeft(yLinearScale); 
-
+    // Append axes to SVG group 
     var xAxis = chartGroup.append("g")
         .attr("transform", `translate(0, ${height})`)
         .call(bottomAxis);
     
     var yAxis = chartGroup.append("g")
         .call(leftAxis);
-    
+    // Render circles
     var circlesGroup = chartGroup.selectAll("circle")
         .data(myData)
         .enter()
@@ -156,7 +161,7 @@ d3.csv("assets/data/data.csv").then(function(myData, err) {
         .attr("cx", d => xLinearScale(d[chosenXAxis]))
         .attr("cy", d => yLinearScale(d[chosenYAxis]))
         .attr("r", radius)
-
+    // Render state labels
     var labelsGroup = chartGroup.selectAll(".stateText")
         .data(myData)
         .enter()
@@ -166,7 +171,7 @@ d3.csv("assets/data/data.csv").then(function(myData, err) {
         .attr("y", d => yLinearScale(d[chosenYAxis]) + radius / 3)
         .attr("font-size", radius)
         .text(d => d.abbr);
-
+    // Create x axis labels and append to an SVG group
     var xLabels = chartGroup.append("g")
         .attr("transform", `translate(${width / 2}, ${height + 20})`);
     
@@ -191,6 +196,7 @@ d3.csv("assets/data/data.csv").then(function(myData, err) {
         .attr("value", "income")
         .text("Household Income (Median)");
 
+    // Create y axis labels and append to an SVG group
     var yLabels = chartGroup.append("g")
         .attr("transform", "rotate(-90)");
 
@@ -218,12 +224,15 @@ d3.csv("assets/data/data.csv").then(function(myData, err) {
         .attr("value", "healthcare")
         .text("Lacks Healthcare (%)");
 
+    // Create tooltips based on current selection
     var labelsGroup = updateToolTip(chosenXAxis, chosenYAxis, labelsGroup);
 
+    // Assign on click handlers to x-axis labels.
     xLabels.selectAll("text")
         .on("click", function() {
+            // Get value from HTML element.
             var value = d3.select(this).attr("value");
-            console.log(`Selected X value: ${value}`);
+            // Validate chosen value and perform plotting functions based on selection.
             if (value !== chosenXAxis) {
                 chosenXAxis = value;
                 xLinearScale = xScale(myData, chosenXAxis);
@@ -231,6 +240,7 @@ d3.csv("assets/data/data.csv").then(function(myData, err) {
                 circlesGroup = renderCircles(circlesGroup, xLinearScale, yLinearScale, chosenXAxis, chosenYAxis);
                 labelsGroup = renderLabels(labelsGroup, xLinearScale, yLinearScale, chosenXAxis, chosenYAxis);
                 labelsGroup = updateToolTip(chosenXAxis, chosenYAxis, labelsGroup);
+                // Chance class to active or inactive based on selection.
                 switch (chosenXAxis){
                     case "poverty": (
                                         povertyLabel.classed("active", true).classed("inactive", false),
@@ -253,7 +263,7 @@ d3.csv("assets/data/data.csv").then(function(myData, err) {
                 }
             }
         });
-
+    // Repeat for y-axis labels
     yLabels.selectAll("text")
         .on("click", function() {
             var value = d3.select(this).attr("value");
