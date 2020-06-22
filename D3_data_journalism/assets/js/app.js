@@ -105,7 +105,7 @@ function updateToolTip(chosenXAxis, chosenYAxis, labelsGroup) {
             break;
         case "smokes": yLabelTool = "Smokes (%):";
             break;
-        case "obese": yLabelTool = "Obesity (%):";
+        case "obesity": yLabelTool = "Obesity (%):";
             break;
     }
 
